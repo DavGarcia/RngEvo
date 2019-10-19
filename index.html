@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RngEvo</title>
+    <style>
+        body {
+            font-size: 18pt;
+            font-family: "Lucida Console", Monaco, monospace;
+        }
+        .container {
+            margin: 1em auto;
+            max-width: 800px;
+        }
+        #sequence div {
+            margin: 1em 0.5em 0 0;
+            color: red;
+        }
+        .matchchar {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RngEvo</h1>
+        <p>Enter a sequence (A-Z and space) and see how long it takes to evolve to match.</p>
+        <form>
+            <label>Enter the goal:<br><input type="text" id="goal" name="goal" value="dogs rule cats drool"></label>
+            <input type="submit" name="submit" value="Start" id="submit">
+        </form>
+        <div id="results">
+        </div>
+        <div id="sequence">
+        </div>
+        </div>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script>
+    function letterrng(length) {
+        // https://stackoverflow.com/a/1349426/40161
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+           result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    function converttonbsp(c) {
+        if (c != ' ') {
+            return c;
+        }
+        return '&nbsp;';
+    }
+
+    String.prototype.toCharArray = function() {
+        return this.split('');
+    }
+  
+    Array.prototype.toString = function() {
+        return this.join('');
+    }
+
+    $(document).ready(function() {
+        $('#submit').click(function (e){
+            var goal = $('#goal').val().toUpperCase();
+            var goala = goal.toCharArray();
+            var goallength = goal.length;
+            var sequencecontainer = $('#sequence');
+            sequencecontainer.empty();
+            var resultscontainer = $('#results');
+            resultscontainer.empty();
+
+            e.preventDefault();
+            var cur = letterrng(goallength);
+
+            var icount = 0;
+
+            function loop() {
+                icount++;
+                var correct = 0, wrong = 0;
+                var cura = cur.toCharArray();
+                var iteration = '<div>';
+                for(i = 0; i < goallength; i++){
+                    if (cura[i] != goala[i]) {
+                        cura[i] = letterrng(1);
+                    }
+                    if (cura[i] != goala[i]) {
+                        iteration += '<span>' + converttonbsp(cura[i]) + '</span>';
+                        wrong++;
+                    } else {
+                        iteration += '<strong class="matchchar">' + converttonbsp(cura[i]) + '</strong>';
+                        correct++;
+                    }
+                }
+                cur = cura.toString();
+                iteration += '</div>';
+                $(iteration).prependTo(sequencecontainer);
+                resultscontainer.html($('<h3>Iteration: ' + icount + ' Correct: ' + correct + ' Wrong: ' + wrong + '</h3>'));
+                if (cur != goal) {
+                    setTimeout(loop, 250);
+                };
+            }
+            loop();
+        });
+    });
+    </script>
+</body>
+</html>
